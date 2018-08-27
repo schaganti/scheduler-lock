@@ -1,4 +1,4 @@
-package chags.scheduler.lock.annotation;
+package chags.scheduler.lock.redis.annotation;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

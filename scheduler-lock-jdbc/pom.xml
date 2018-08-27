@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>chags</groupId>
-	<artifactId>scheduler-lock-core</artifactId>
+	<artifactId>scheduler-lock-jdbc</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
@@ -24,8 +24,13 @@
 	</properties>
 	<dependencies>
 		<dependency>
+			<groupId>chags</groupId>
+			<artifactId>scheduler-lock-core</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework.integration</groupId>
-			<artifactId>spring-integration-core</artifactId>
+			<artifactId>spring-integration-redis</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -46,7 +51,7 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
 		</plugins>
-	</build> -->
-
+	</build>
+ -->
 
 </project>

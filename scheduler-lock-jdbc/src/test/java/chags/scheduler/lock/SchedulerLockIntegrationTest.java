@@ -17,6 +17,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import chags.scheduler.lock.annotation.EnableSchedulerLocking;
+import chags.scheduler.lock.annotation.SchedulerLockConfig;
+import chags.scheduler.lock.jdbc.annotation.EnableJdbcSchedulerLocking;
 import lombok.Data;
 
 @RunWith(SpringRunner.class)
@@ -46,17 +48,12 @@ public class SchedulerLockIntegrationTest {
 	
 	@Configuration
 	@EnableScheduling
-	@EnableSchedulerLocking
+	@EnableJdbcSchedulerLocking(tablePrefix="INT_", region="dsf", timeToLive=10000)
 	public static class TestConfig {
 
 		@Bean
 		public TestScheduledJob testScheduledJob() {
 			return new TestScheduledJob();
-		}
-		
-		@Bean 
-		public LockRegistry lockRegistry() {
-			return new DefaultLockRegistry();
 		}
 	}
 	

@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.integration.support.locks.DefaultLockRegistry;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -16,7 +15,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import chags.scheduler.lock.annotation.EnableSchedulerLocking;
+import chags.scheduler.lock.redis.annotation.EnableRedisSchedulerLocking;
 import lombok.Data;
 
 @RunWith(SpringRunner.class)
@@ -46,17 +45,12 @@ public class SchedulerLockIntegrationTest {
 	
 	@Configuration
 	@EnableScheduling
-	@EnableSchedulerLocking
+	@EnableRedisSchedulerLocking
 	public static class TestConfig {
 
 		@Bean
 		public TestScheduledJob testScheduledJob() {
 			return new TestScheduledJob();
-		}
-		
-		@Bean 
-		public LockRegistry lockRegistry() {
-			return new DefaultLockRegistry();
 		}
 	}
 	

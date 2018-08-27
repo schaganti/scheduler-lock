@@ -1,4 +1,4 @@
-package chags.scheduler.lock.annotation;
+package chags.scheduler.lock.jdbc.annotation;
 
 import java.util.Map;
 
@@ -10,9 +10,10 @@ import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.integration.support.locks.DefaultLockRegistry;
 import org.springframework.integration.support.locks.LockRegistry;
 
+import chags.scheduler.lock.annotation.SchedulerLockConfig;
+
 @Configuration
-//@ConditionalOnBean({ RedisConnectionFactory.class })
-public class RedisSchedulerLockConfig extends SchedulerLockConfig implements ImportAware {
+public class JdbcSchedulerLockConfig extends SchedulerLockConfig implements ImportAware {
 
 	@Bean
 	public LockRegistry lockRegistry() {
@@ -23,7 +24,7 @@ public class RedisSchedulerLockConfig extends SchedulerLockConfig implements Imp
 	public void setImportMetadata(AnnotationMetadata importMetadata) {
 
 		Map<String, Object> attributeMap = importMetadata
-				.getAnnotationAttributes(EnableRedisSchedulerLocking.class.getName());
+				.getAnnotationAttributes(EnableJdbcSchedulerLocking.class.getName());
 		
 		System.out.println(attributeMap);
 
