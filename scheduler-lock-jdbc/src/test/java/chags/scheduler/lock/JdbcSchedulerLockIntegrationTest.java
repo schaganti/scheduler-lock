@@ -31,7 +31,7 @@ import lombok.Data;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ContextConfiguration(classes = { JdbcSchedulerLockIntegrationTest.TestConfig.class })
-@TestPropertySource(properties = { "tablePrefix=INT_", "region=dsf" })
+@TestPropertySource(properties = { "tablePrefix=TEST_", "region=dsf" })
 public class JdbcSchedulerLockIntegrationTest {
 
 	@Autowired
@@ -72,19 +72,18 @@ public class JdbcSchedulerLockIntegrationTest {
 	@Test
 	public void schedulerShouldConfigureLockFromAnnotationMetaData() {
 
-		assertThat(jdbcSchedulerLockConfig.getTablePrefix()).isEqualTo("INT_");
+		assertThat(jdbcSchedulerLockConfig.getTablePrefix()).isEqualTo("TEST_");
 		assertThat(jdbcSchedulerLockConfig.getRegion()).isEqualTo("dsf");
 		assertThat(jdbcSchedulerLockConfig.getTimeToLive()).isEqualTo(10000);
 
 		String lockKey = "someLock";
 		Lock lock = lockRegistry.obtain(lockKey);
 		String lockUUID = UUIDConverter.getUUID(lockKey).toString();
-		
+
 		try {
 			assertThat(lock.tryLock()).isEqualTo(true);
-			assertThat(jdbcTemplate.queryForObject(
-					"select count(*) from INT_LOCK where LOCK_KEY=? and REGION=?", Integer.class, lockUUID, jdbcSchedulerLockConfig.getRegion()))
-							.isEqualTo(1);
+			assertThat(jdbcTemplate.queryForObject("select count(*) from TEST_LOCK where LOCK_KEY=? and REGION=?",
+					Integer.class, lockUUID, jdbcSchedulerLockConfig.getRegion())).isEqualTo(1);
 		} finally {
 			lock.unlock();
 		}
@@ -103,8 +102,8 @@ public class JdbcSchedulerLockIntegrationTest {
 
 		@Bean
 		DataSource dataSource() {
-			return new EmbeddedDatabaseBuilder().setType(EmbeddedDatabaseType.H2)
-					.addScript("classpath:/org/springframework/integration/jdbc/schema-h2.sql").build();
+			return new EmbeddedDatabaseBuilder().setType(EmbeddedDatabaseType.H2).addScript("classpath:test_schema.sql")
+					.build();
 		}
 
 		@Bean
@@ -120,7 +119,7 @@ public class JdbcSchedulerLockIntegrationTest {
 		int invocationCount;
 
 		@Scheduled(fixedDelay = 1000, initialDelay = 2000)
-		@SchedulerLock(name =TEST_LOCK)
+		@SchedulerLock(name = TEST_LOCK)
 		public void runJob() {
 			invocationCount++;
 		}
