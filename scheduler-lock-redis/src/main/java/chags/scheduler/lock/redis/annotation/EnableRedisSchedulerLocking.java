@@ -10,5 +10,6 @@ import org.springframework.context.annotation.Import;
 public @interface EnableRedisSchedulerLocking {
 
 	String redisNameSpace() default "schedulerLock";
+	int lockExpiryInterval() default 3600000;
 	
 }
