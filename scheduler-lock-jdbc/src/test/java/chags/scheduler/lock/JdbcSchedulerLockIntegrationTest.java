@@ -2,6 +2,10 @@ package chags.scheduler.lock;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.concurrent.locks.Lock;
+
+import javax.sql.DataSource;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -10,6 +14,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.support.locks.LockRegistry;
+import org.springframework.integration.util.UUIDConverter;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.test.context.ContextConfiguration;
@@ -23,7 +31,7 @@ import lombok.Data;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ContextConfiguration(classes = { JdbcSchedulerLockIntegrationTest.TestConfig.class })
-@TestPropertySource(properties={"tablePrefix=INT_","region=dsf"})
+@TestPropertySource(properties = { "tablePrefix=INT_", "region=dsf" })
 public class JdbcSchedulerLockIntegrationTest {
 
 	@Autowired
@@ -34,6 +42,9 @@ public class JdbcSchedulerLockIntegrationTest {
 
 	@Autowired
 	JdbcSchedulerLockConfig jdbcSchedulerLockConfig;
+
+	@Autowired
+	JdbcTemplate jdbcTemplate;
 
 	@Before
 	public void before() {
@@ -48,9 +59,14 @@ public class JdbcSchedulerLockIntegrationTest {
 
 	@Test
 	public void schedulerShouldSkipTheJob() throws InterruptedException {
-		lockRegistry.obtain(TestScheduledJob.TEST_LOCK).lock();
-		Thread.sleep(5000);
-		assertThat(testScheduledJob.getInvocationCount()).isEqualTo(0);
+		Lock lock = lockRegistry.obtain(TestScheduledJob.TEST_LOCK);
+		try {
+			lock.lock();
+			Thread.sleep(5000);
+			assertThat(testScheduledJob.getInvocationCount()).isEqualTo(0);
+		} finally {
+			lock.unlock();
+		}
 	}
 
 	@Test
@@ -59,6 +75,20 @@ public class JdbcSchedulerLockIntegrationTest {
 		assertThat(jdbcSchedulerLockConfig.getTablePrefix()).isEqualTo("INT_");
 		assertThat(jdbcSchedulerLockConfig.getRegion()).isEqualTo("dsf");
 		assertThat(jdbcSchedulerLockConfig.getTimeToLive()).isEqualTo(10000);
+
+		String lockKey = "someLock";
+		Lock lock = lockRegistry.obtain(lockKey);
+		String lockUUID = UUIDConverter.getUUID(lockKey).toString();
+		
+		try {
+			assertThat(lock.tryLock()).isEqualTo(true);
+			assertThat(jdbcTemplate.queryForObject(
+					"select count(*) from INT_LOCK where LOCK_KEY=? and REGION=?", Integer.class, lockUUID, jdbcSchedulerLockConfig.getRegion()))
+							.isEqualTo(1);
+		} finally {
+			lock.unlock();
+		}
+
 	}
 
 	@Configuration
@@ -70,6 +100,17 @@ public class JdbcSchedulerLockIntegrationTest {
 		public TestScheduledJob testScheduledJob() {
 			return new TestScheduledJob();
 		}
+
+		@Bean
+		DataSource dataSource() {
+			return new EmbeddedDatabaseBuilder().setType(EmbeddedDatabaseType.H2)
+					.addScript("classpath:/org/springframework/integration/jdbc/schema-h2.sql").build();
+		}
+
+		@Bean
+		JdbcTemplate jdbcTemplate(DataSource dataSource) {
+			return new JdbcTemplate(dataSource);
+		}
 	}
 
 	@Data
@@ -78,8 +119,8 @@ public class JdbcSchedulerLockIntegrationTest {
 		public static final String TEST_LOCK = "testLock";
 		int invocationCount;
 
-		@Scheduled(fixedDelay = 3000, initialDelay = 2000)
-		@SchedulerLock(name = TEST_LOCK, lockRegistryBean = "lockRegistry")
+		@Scheduled(fixedDelay = 1000, initialDelay = 2000)
+		@SchedulerLock(name =TEST_LOCK)
 		public void runJob() {
 			invocationCount++;
 		}
