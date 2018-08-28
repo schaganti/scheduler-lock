@@ -38,7 +38,7 @@ public class RedisSchedulerLockConfig extends SchedulerLockConfig implements Imp
 	public void setImportMetadata(AnnotationMetadata importMetadata) {
 
 		AnnotationAttributes attributes = getAnnotationAttributes(importMetadata,
-				EnableRedisSchedulerLocking.class.getName());
+				EnableRedisSchedulerLock.class.getName());
 		this.redisNameSpace = attributes.getString("redisNameSpace");
 		this.lockExipryInterval = attributes.getNumber("lockExpiryInterval");
 	}

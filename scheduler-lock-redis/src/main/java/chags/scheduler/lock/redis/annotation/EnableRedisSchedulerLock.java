@@ -7,9 +7,8 @@ import org.springframework.context.annotation.Import;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Import(RedisSchedulerLockConfig.class)
-public @interface EnableRedisSchedulerLocking {
+public @interface EnableRedisSchedulerLock {
 
-	String redisNameSpace() default "schedulerLock";
+	String redisNameSpace() default "scheduler-lock";
 	int lockExpiryInterval() default 3600000;
-	
 }

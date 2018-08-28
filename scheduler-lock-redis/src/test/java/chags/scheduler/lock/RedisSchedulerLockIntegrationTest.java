@@ -26,7 +26,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import chags.scheduler.lock.redis.annotation.EnableRedisSchedulerLocking;
+import chags.scheduler.lock.annotation.SchedulerLock;
+import chags.scheduler.lock.redis.annotation.EnableRedisSchedulerLock;
 import chags.scheduler.lock.redis.annotation.RedisSchedulerLockConfig;
 import lombok.Data;
 
@@ -115,7 +116,7 @@ public class RedisSchedulerLockIntegrationTest {
 
 	@Configuration
 	@EnableScheduling
-	@EnableRedisSchedulerLocking(redisNameSpace ="${redisNameSpace}", lockExpiryInterval = LOCK_EXPIRY_INTERVAL)
+	@EnableRedisSchedulerLock(redisNameSpace ="${redisNameSpace}", lockExpiryInterval = LOCK_EXPIRY_INTERVAL)
 	public static class TestConfig {
 
 		@Bean

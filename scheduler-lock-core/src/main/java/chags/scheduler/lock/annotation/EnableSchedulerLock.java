@@ -7,6 +7,6 @@ import org.springframework.context.annotation.Import;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Import(SchedulerLockConfig.class)
-public @interface EnableSchedulerLocking {
+public @interface EnableSchedulerLock {
 
 }

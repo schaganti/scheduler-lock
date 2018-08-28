@@ -16,7 +16,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import chags.scheduler.lock.annotation.EnableSchedulerLocking;
+import chags.scheduler.lock.annotation.EnableSchedulerLock;
+import chags.scheduler.lock.annotation.SchedulerLock;
 import lombok.Data;
 
 @RunWith(SpringRunner.class)
@@ -50,7 +51,7 @@ public class SchedulerLockIntegrationTest {
 	
 	@Configuration
 	@EnableScheduling
-	@EnableSchedulerLocking
+	@EnableSchedulerLock
 	public static class TestConfig {
 
 		@Bean

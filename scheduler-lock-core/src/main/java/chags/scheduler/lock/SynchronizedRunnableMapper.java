@@ -8,6 +8,7 @@ import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.scheduling.support.ScheduledMethodRunnable;
 import org.springframework.util.StringUtils;
 
+import chags.scheduler.lock.annotation.SchedulerLock;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
@@ -19,6 +20,10 @@ public class SynchronizedRunnableMapper implements Function<Runnable, Runnable> 
 	@Override
 	public Runnable apply(Runnable runnable) {
 
+		if (!(runnable instanceof ScheduledMethodRunnable)) {
+			return runnable;
+		}
+
 		ScheduledMethodRunnable scheduledRunnerForMethod = (ScheduledMethodRunnable) runnable;
 		SchedulerLock schedulerLock = AnnotatedElementUtils.getMergedAnnotation(scheduledRunnerForMethod.getMethod(),
 				SchedulerLock.class);
@@ -26,8 +31,15 @@ public class SynchronizedRunnableMapper implements Function<Runnable, Runnable> 
 		if (schedulerLock == null) {
 			return runnable;
 		}
-		
-		return new SynchronizedRunnable(scheduledRunnerForMethod, schedulerLock, getLockRegistry(schedulerLock));
+
+		return new SynchronizedRunnable(scheduledRunnerForMethod, schedulerLock.maxWaitTime(),
+				resolveLockName(scheduledRunnerForMethod, schedulerLock), getLockRegistry(schedulerLock));
+	}
+
+	private String resolveLockName(ScheduledMethodRunnable runnableMethod, SchedulerLock schedulerLock) {
+		return StringUtils.isEmpty(schedulerLock.name())
+				? runnableMethod.getTarget().getClass().getName() + ":" + runnableMethod.getMethod().getName()
+				: schedulerLock.name();
 	}
 
 	private LockRegistry getLockRegistry(SchedulerLock schedulerLock) {

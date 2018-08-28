@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Import;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Import(JdbcSchedulerLockConfig.class)
-public @interface EnableJdbcSchedulerLocking {
+public @interface EnableJdbcSchedulerLock {
 
 	String tablePrefix() default "INT_";
 

@@ -24,7 +24,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import chags.scheduler.lock.jdbc.annotation.EnableJdbcSchedulerLocking;
+import chags.scheduler.lock.annotation.SchedulerLock;
+import chags.scheduler.lock.jdbc.annotation.EnableJdbcSchedulerLock;
 import chags.scheduler.lock.jdbc.annotation.JdbcSchedulerLockConfig;
 import lombok.Data;
 
@@ -92,7 +93,7 @@ public class JdbcSchedulerLockIntegrationTest {
 
 	@Configuration
 	@EnableScheduling
-	@EnableJdbcSchedulerLocking(tablePrefix = "${tablePrefix}", region = "${region}", timeToLive = 10000)
+	@EnableJdbcSchedulerLock(tablePrefix = "${tablePrefix}", region = "${region}", timeToLive = 10000)
 	public static class TestConfig {
 
 		@Bean
@@ -119,7 +120,7 @@ public class JdbcSchedulerLockIntegrationTest {
 		int invocationCount;
 
 		@Scheduled(fixedDelay = 1000, initialDelay = 2000)
-		@SchedulerLock(name = TEST_LOCK)
+		@SchedulerLock(name=TEST_LOCK)
 		public void runJob() {
 			invocationCount++;
 		}

@@ -44,7 +44,7 @@ public class JdbcSchedulerLockConfig extends SchedulerLockConfig implements Impo
 	@Override
 	public void setImportMetadata(AnnotationMetadata importMetadata) {
 		AnnotationAttributes annotationAttributes = getAnnotationAttributes(importMetadata,
-				EnableJdbcSchedulerLocking.class.getName());
+				EnableJdbcSchedulerLock.class.getName());
 		this.tablePrefix = annotationAttributes.getString("tablePrefix");
 		this.region = annotationAttributes.getString("region");
 		this.timeToLive = annotationAttributes.getNumber("timeToLive");

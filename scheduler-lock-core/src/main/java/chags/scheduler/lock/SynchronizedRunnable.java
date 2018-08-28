@@ -9,6 +9,7 @@ import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.scheduling.support.ScheduledMethodRunnable;
 import org.springframework.util.StringUtils;
 
+import chags.scheduler.lock.annotation.SchedulerLock;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,15 +18,15 @@ import lombok.Getter;
 @Getter(value = AccessLevel.PACKAGE)
 public class SynchronizedRunnable implements Runnable {
 
-	private Runnable runnable;
-	private SchedulerLock schedulerLock;
+	private ScheduledMethodRunnable runnable;
+	private long maxWaitTime;
+	private String lockName;
 	private LockRegistry lockRegistry;
 
 	@Override
 	public void run() {
 
-		Lock lock = lockRegistry.obtain(schedulerLock.name());
-
+		Lock lock = lockRegistry.obtain(lockName);
 		try {
 			if (acquireLock(lock)) {
 				try {
@@ -40,8 +41,8 @@ public class SynchronizedRunnable implements Runnable {
 	}
 
 	private boolean acquireLock(Lock lock) throws InterruptedException {
-		if (schedulerLock.maxWaitTime() > 0) {
-			return lock.tryLock(schedulerLock.maxWaitTime(), TimeUnit.MILLISECONDS);
+		if (maxWaitTime > 0) {
+			return lock.tryLock(maxWaitTime, TimeUnit.MILLISECONDS);
 		} else {
 			return lock.tryLock();
 		}

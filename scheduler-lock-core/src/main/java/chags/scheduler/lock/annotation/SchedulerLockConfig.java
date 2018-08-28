@@ -21,9 +21,9 @@ public class SchedulerLockConfig implements EmbeddedValueResolverAware{
 	
 	private StringValueResolver stringValueResolver;
 	
-	@Bean
-	TaskScheduler schedulerLockTaskScheduler(SynchronizedRunnableMapper synchronizedRunnerMapper) {
-
+	@Bean(name={"taskScheduler"})
+	TaskScheduler taskScheduler(SynchronizedRunnableMapper synchronizedRunnerMapper) {
+		
 		ThreadPoolTaskScheduler threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
 		threadPoolTaskScheduler.setPoolSize(10);
 		threadPoolTaskScheduler.initialize();
