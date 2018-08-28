@@ -102,7 +102,7 @@ public class SynchronizedRunnableMapperTest {
 				"runWithOutLockName");
 		SynchronizedRunnable synchRunner = (SynchronizedRunnable) subject.apply(scheduledRunnerForMethod);
 
-		assertThat(synchRunner.getLockName()).isEqualTo(scheduledRunnerForMethod.getTarget().getClass().getName() + ":"
+		assertThat(synchRunner.getLockName()).isEqualTo(scheduledRunnerForMethod.getTarget().getClass().getName() + "."
 				+ scheduledRunnerForMethod.getMethod().getName());
 
 	}

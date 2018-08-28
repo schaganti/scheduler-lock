@@ -13,9 +13,13 @@ import chags.scheduler.lock.annotation.SchedulerLock;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 
 @AllArgsConstructor
 @Getter(value = AccessLevel.PACKAGE)
+@ToString
+@Slf4j
 public class SynchronizedRunnable implements Runnable {
 
 	private ScheduledMethodRunnable runnable;
@@ -28,12 +32,17 @@ public class SynchronizedRunnable implements Runnable {
 
 		Lock lock = lockRegistry.obtain(lockName);
 		try {
+			log.info("Trying to aquire lock: {}", lockName);
 			if (acquireLock(lock)) {
 				try {
+					log.info("Aquired lock: {}, running: {}()", lockName, runnable);
 					runnable.run();
 				} finally {
+					log.info("Releasing lock: {}", lockName);
 					lock.unlock();
 				}
+			} else {
+				log.info("Could not aquire lock: {}, skipping execution", lockName);
 			}
 		} catch (InterruptedException e) {
 			throw new RuntimeException("Exception occured while trying to acquire the lock " + e.getMessage(), e);
@@ -41,10 +50,6 @@ public class SynchronizedRunnable implements Runnable {
 	}
 
 	private boolean acquireLock(Lock lock) throws InterruptedException {
-		if (maxWaitTime > 0) {
-			return lock.tryLock(maxWaitTime, TimeUnit.MILLISECONDS);
-		} else {
-			return lock.tryLock();
-		}
+		return lock.tryLock(maxWaitTime, TimeUnit.MILLISECONDS);
 	}
 }

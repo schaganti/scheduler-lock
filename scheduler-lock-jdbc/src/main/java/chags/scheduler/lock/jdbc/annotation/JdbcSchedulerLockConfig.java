@@ -14,9 +14,11 @@ import org.springframework.util.StringValueResolver;
 
 import chags.scheduler.lock.annotation.SchedulerLockConfig;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 @Configuration
 @Getter
+@Slf4j
 public class JdbcSchedulerLockConfig extends SchedulerLockConfig implements ImportAware {
 
 	private String tablePrefix;
@@ -28,16 +30,18 @@ public class JdbcSchedulerLockConfig extends SchedulerLockConfig implements Impo
 	@Bean
 	public LockRegistry lockRegistry(DataSource dataSource) {
 		
+		
 		StringValueResolver stringValueResolver = getStringValueResolver();
 		this.tablePrefix = stringValueResolver.resolveStringValue(tablePrefix);
 		this.region = stringValueResolver.resolveStringValue(region);
+		
+		log.info("Configuring jdbc lock registry with tablePrfix: {}, region: {}, timeToLive: {}", tablePrefix, region, timeToLive);
 		
 		DefaultLockRepository lockRepository = new DefaultLockRepository(dataSource);
 		lockRepository.setPrefix(tablePrefix);
 		lockRepository.setRegion(region);
 		lockRepository.setTimeToLive(timeToLive);
 		lockRepository.afterPropertiesSet();
-		
 		return new JdbcLockRegistry(lockRepository);
 	}
 

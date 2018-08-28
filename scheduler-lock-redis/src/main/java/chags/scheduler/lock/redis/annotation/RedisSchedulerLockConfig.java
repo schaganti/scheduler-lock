@@ -1,8 +1,5 @@
 package chags.scheduler.lock.redis.annotation;
 
-import java.util.Map;
-
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,9 +13,11 @@ import org.springframework.util.StringValueResolver;
 
 import chags.scheduler.lock.annotation.SchedulerLockConfig;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 @Configuration
 @Getter
+@Slf4j
 public class RedisSchedulerLockConfig extends SchedulerLockConfig implements ImportAware, EmbeddedValueResolverAware {
 
 	private String redisNameSpace;
@@ -30,6 +29,9 @@ public class RedisSchedulerLockConfig extends SchedulerLockConfig implements Imp
 
 		StringValueResolver stringValueResolver = getStringValueResolver();
 		redisNameSpace = stringValueResolver.resolveStringValue(redisNameSpace);
+
+		log.info("Configuring redis lock registry with redisNameSpace: {} lockExpiryInterval: {}", redisNameSpace,
+				lockExipryInterval);
 
 		return new RedisLockRegistry(redisConnectionFactory, redisNameSpace, lockExipryInterval);
 	}

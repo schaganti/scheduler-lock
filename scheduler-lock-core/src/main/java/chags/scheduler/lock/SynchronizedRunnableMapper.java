@@ -10,8 +10,11 @@ import org.springframework.util.StringUtils;
 
 import chags.scheduler.lock.annotation.SchedulerLock;
 import lombok.AllArgsConstructor;
+import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 
 @AllArgsConstructor
+@Slf4j
 public class SynchronizedRunnableMapper implements Function<Runnable, Runnable> {
 
 	private LockRegistry defaultLockRegistry;
@@ -20,7 +23,11 @@ public class SynchronizedRunnableMapper implements Function<Runnable, Runnable> 
 	@Override
 	public Runnable apply(Runnable runnable) {
 
+		log.info("Received instance for wrapping {}", runnable);
+
 		if (!(runnable instanceof ScheduledMethodRunnable)) {
+			log.info("Not wrapping {} into Synchronized Runnable as its not of type ScheduledMethodRunnable",
+					runnable);
 			return runnable;
 		}
 
@@ -29,17 +36,27 @@ public class SynchronizedRunnableMapper implements Function<Runnable, Runnable> 
 				SchedulerLock.class);
 
 		if (schedulerLock == null) {
+			log.info("SchedulerLock annotation not present on {}, not wrapping SyncrhonizedRunner",
+					getFullyQualifiedMethodName(scheduledRunnerForMethod));
 			return runnable;
 		}
 
-		return new SynchronizedRunnable(scheduledRunnerForMethod, schedulerLock.maxWaitTime(),
-				resolveLockName(scheduledRunnerForMethod, schedulerLock), getLockRegistry(schedulerLock));
+		SynchronizedRunnable synchronizedRunnable = new SynchronizedRunnable(scheduledRunnerForMethod,
+				schedulerLock.maxWaitTime(), resolveLockName(scheduledRunnerForMethod, schedulerLock),
+				getLockRegistry(schedulerLock));
+
+		log.info("wrapping runnable {} into {}", runnable, synchronizedRunnable);
+
+		return synchronizedRunnable;
 	}
 
 	private String resolveLockName(ScheduledMethodRunnable runnableMethod, SchedulerLock schedulerLock) {
-		return StringUtils.isEmpty(schedulerLock.name())
-				? runnableMethod.getTarget().getClass().getName() + ":" + runnableMethod.getMethod().getName()
+		return StringUtils.isEmpty(schedulerLock.name()) ? getFullyQualifiedMethodName(runnableMethod)
 				: schedulerLock.name();
+	}
+
+	private String getFullyQualifiedMethodName(ScheduledMethodRunnable runnableMethod) {
+		return runnableMethod.getTarget().getClass().getName() + "." + runnableMethod.getMethod().getName();
 	}
 
 	private LockRegistry getLockRegistry(SchedulerLock schedulerLock) {

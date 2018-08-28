@@ -8,8 +8,10 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @AllArgsConstructor
+@Slf4j
 public class LockingTaskScheduler implements TaskScheduler {
 
 	private TaskScheduler delegate;
